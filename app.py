@@ -7,7 +7,7 @@ from PIL import Image
 from uuid import uuid4
 import pytesseract
 
-pytesseract.pytesseract.tesseract_cmd = "C:\\Users\\FS153417\\OneDrive - First Solar\\Desktop\\Tesseract Test\\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = #pathtotesseract if tesseract is not in the system PATH
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
