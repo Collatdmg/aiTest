@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+  <title>Adaptive Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding-bottom: 120px;
+      background-color: #f4f4f4;
+    }
+    .chat-container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 15px;
+      max-width: 60%;
+      clear: both;
+      white-space: pre-wrap;
+    }
+    .user-message {
+      background-color: #d1e7dd;
+      border: 1px solid #0f5132;
+      float: right;
+      text-align: left;
+    }
+    .bot-message {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      float: left;
+      text-align: left;
+    }
+    .chat-box {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #ffffff;
+      border-top: 1px solid #ccc;
+      padding: 15px;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    }
+    .chat-box textarea {
+      width: 60%;
+      height: 60px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      resize: none;
+      vertical-align: top;
+    }
+    .chat-box input[type="file"] {
+      margin-left: 10px;
+    }
+    .chat-box button {
+      border: none;
+      padding: 10px 20px;
+      margin-left: 10px;
+      border-radius: 20px;
+      background-color: #0d6efd;
+      color: white;
+      cursor: pointer;
+    }
+    .chat-box button:hover {
+      background-color: #0b5ed7;
+    }
+    .clearfix::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+    .thinking-dots .dots::after {
+      content: '';
+      animation: dots 1.5s steps(1, end) infinite;
+    }
+    @keyframes dots {
+      0% { content: ''; }
+      20% { content: '.'; }
+      40% { content: '..'; }
+      60% { content: '...'; }
+      80% { content: '..'; }
+      90% { content: '.'; }
+      100% { content: ''; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h2>Chat with the AI</h2>
+    <div class="clearfix" id="chatHistory"></div>
+  </div>
+
+  <div class="chat-box">
+    <form id="chatForm" enctype="multipart/form-data">
+      <textarea name="message" placeholder="Type your message here..." id="messageInput"></textarea>
+      <input type="file" name="file" id="fileInput" accept=".png,.jpg,.jpeg,.txt,.py,.js,.html,.css,.json,.csv">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("chatForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const formData = new FormData(form);
+      const userMessage = formData.get("message");
+
+      const chatHistory = document.getElementById("chatHistory");
+      chatHistory.innerHTML += `
+        <div class="message user-message">${userMessage}</div>
+        <div class="message bot-message"><span class="thinking-dots">Thinking<span class="dots"></span></span></div>
+      `;
+
+      fetch("/async-message", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        const botMessages = document.querySelectorAll(".bot-message");
+        botMessages[botMessages.length - 1].innerHTML = data.bot;
+      });
+
+      form.reset();
+    });
+
+    document.getElementById("messageInput").addEventListener("keydown", function(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        document.getElementById("chatForm").dispatchEvent(new Event("submit"));
+      }
+    });
+  </script>
+</body>
+</html>
